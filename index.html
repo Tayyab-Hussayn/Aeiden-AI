@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A futuristic chatbot with a 3D background animation powered by Gemini AI.">
+    <meta charset="UTF-8">
+    <title>Tayyab's AI Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Reset & Body Styling */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars from 3D background */
+            font-family: 'Inter', sans-serif; /* Using Inter font */
+            background: #0f2027; /* Fallback background color */
+        }
+        body {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Background Canvas for 3D Animation */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0; /* Ensures it stays behind the chatbot */
+            background: linear-gradient(135deg, #0f2027 0%, #2c5364 100%); /* Gradient background */
+        }
+
+        /* Chatbot Container Styling */
+        .chatbot-container {
+            position: relative; /* Relative to body, for z-index */
+            background: rgba(30, 40, 60, 0.85); /* Semi-transparent dark background */
+            border-radius: 20px; /* Rounded corners */
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); /* Glassmorphism shadow */
+            padding: 32px 24px;
+            width: 90%; /* Responsive width */
+            max-width: 900px; /* Max width for larger screens */
+            z-index: 1; /* Ensures it's above the canvas */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            backdrop-filter: blur(8px); /* Glassmorphism blur effect */
+            -webkit-backdrop-filter: blur(8px); /* For Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.18); /* Subtle border */
+        }
+
+        /* Chatbot Title */
+        .chatbot-title {
+            font-size: 2.2rem; /* Larger title */
+            color: #00ffe7; /* Bright cyan color */
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00ffe7, 0 0 20px rgba(0,255,231,0.5); /* Glowing effect */
+            font-weight: 700;
+        }
+
+        /* Chat Window */
+        .chat-window {
+            width: 100%;
+            height: 300px; /* Increased height for more messages */
+            background: rgba(20, 30, 40, 0.7); /* Darker semi-transparent background */
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow-y: auto; /* Enable scrolling for chat history */
+            padding: 15px;
+            color: #e0e0e0; /* Lighter text color */
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: inset 0 0 8px rgba(0,255,231,0.1); /* Inner shadow */
+            border: 1px solid rgba(0,255,231,0.2);
+            display: flex; /* Use flexbox for messages */
+            flex-direction: column;
+        }
+
+        /* Scrollbar styling for chat window */
+        .chat-window::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-window::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        .chat-window::-webkit-scrollbar-thumb {
+            background: #00ffe7;
+            border-radius: 10px;
+            border: 2px solid rgba(20, 30, 40, 0.7);
+        }
+        .chat-window::-webkit-scrollbar-thumb:hover {
+            background: #00e0cc;
+        }
+
+        /* Chat Input Field */
+        .chat-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: #222c3c; /* Dark input background */
+            color: #00ffe7;
+            font-size: 1rem;
+            outline: none; /* Remove outline on focus */
+            margin-bottom: 12px;
+            box-shadow: inset 0 0 5px rgba(0,255,231,0.1);
+            transition: box-shadow 0.2s;
+        }
+        .chat-input::placeholder {
+            color: #778899; /* Placeholder color */
+        }
+        .chat-input:focus {
+            box-shadow: inset 0 0 8px rgba(0,255,231,0.3), 0 0 5px rgba(0,255,231,0.5);
+        }
+
+        /* Send Button */
+        .send-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(90deg, #00ffe7 0%, #2c5364 100%); /* Gradient button */
+            color: #1a2a3a; /* Dark text for contrast */
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease; /* Smooth transition for hover effects */
+            box-shadow: 0 4px 15px rgba(0,255,231,0.3);
+        }
+        .send-btn:hover {
+            background: linear-gradient(90deg, #2c5364 0%, #00ffe7 100%); /* Reverse gradient on hover */
+            box-shadow: 0 6px 20px rgba(0,255,231,0.5);
+            transform: translateY(-2px); /* Slight lift effect */
+        }
+        .send-btn:active {
+            transform: translateY(0); /* Press down effect */
+            box-shadow: 0 2px 10px rgba(0,255,231,0.2);
+        }
+        .send-btn:disabled {
+            background: #444;
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Message Styling */
+        .message {
+            margin-bottom: 10px;
+            line-height: 1.4;
+            padding: 8px 12px;
+            border-radius: 10px;
+            max-width: 85%;
+            word-wrap: break-word; /* Ensure long words break */
+        }
+        .user {
+            background-color: rgba(0, 255, 231, 0.15); /* Light cyan background for user messages */
+            color: #00ffe7;
+            align-self: flex-end; /* Align user messages to the right */
+            border: 1px solid rgba(0, 255, 231, 0.3);
+            font-weight: normal; /* User messages don't need to be bold */
+        }
+        .bot {
+            background-color: rgba(255, 255, 255, 0.1); /* Lighter background for bot messages */
+            color: #fff;
+            align-self: flex-start; /* Align bot messages to the left */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: normal; /* Bot messages don't need to be bold */
+        }
+        .message span {
+            font-weight: bold; /* Only the sender name is bold */
+        }
+
+        /* Loading Indicator */
+        .loading-dots {
+            display: inline-block;
+            position: relative;
+            width: 30px;
+            height: 10px;
+            margin-left: 5px;
+        }
+        .loading-dots div {
+            position: absolute;
+            top: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ffe7;
+            animation-timing-function: cubic-bezier(0, 1, 1, 0);
+        }
+        .loading-dots div:nth-child(1) {
+            left: 0px;
+            animation: loading-dots1 0.6s infinite;
+        }
+        .loading-dots div:nth-child(2) {
+            left: 0px;
+            animation: loading-dots2 0.6s infinite;
+        }
+        .loading-dots div:nth-child(3) {
+            left: 16px;
+            animation: loading-dots3 0.6s infinite;
+        }
+        @keyframes loading-dots1 {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        @keyframes loading-dots2 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(16px, 0); }
+        }
+        @keyframes loading-dots3 {
+            0% { transform: scale(1); }
+            100% { transform: scale(0); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .chatbot-container {
+                width: 95%;
+                padding: 20px 15px;
+            }
+            .chatbot-title {
+                font-size: 1.8rem;
+            }
+            .chat-window {
+                height: 250px;
+            }
+            .chat-input, .send-btn {
+                font-size: 0.95rem;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="chatbot-container">
+        <div class="chatbot-title">Tayyab's AI Assistant</div>
+        <div class="chat-window" id="chat-window"></div>
+        <input type="text" class="chat-input" id="chat-input" placeholder="Type your message...">
+        <button class="send-btn" id="send-btn">Send</button>
+    </div>
+
+    <script>
+        // --- Configuration for Flask Backend API ---
+        const FLASK_API_URL = 'http://127.0.0.1:5000/chat';
+
+        // Chat history to maintain context for the Gemini model
+        let chatHistory = [];
+
+        // --- 3D Background Animation Logic ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h;
+
+        // Function to resize canvas on window resize
+        function resizeCanvas() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+            // Re-initialize sphere positions if needed, or just let them wrap
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas(); // Initial resize
+
+        // Generate floating 3D spheres
+        const spheres = [];
+        for (let i = 0; i < 30; i++) {
+            spheres.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                z: Math.random() * 400 + 100, // Z-depth for perspective (100-500)
+                r: Math.random() * 30 + 20, // Radius (20-50)
+                dx: (Math.random() - 0.5) * 0.7, // X-direction speed (-0.35 to 0.35)
+                dy: (Math.random() - 0.5) * 0.7, // Y-direction speed
+                dz: (Math.random() - 0.5) * 0.3, // Z-direction speed
+                // Corrected rgba string literal
+                color: `rgba(0,255,231,${Math.random() * 0.5 + 0.3})` // Cyan with varying opacity
+            });
+        }
+
+        // Function to draw a single sphere with perspective
+        function drawSphere(s) {
+            // Perspective projection calculation
+            const scale = 200 / s.z; // Closer objects (smaller z) appear larger
+            const x2d = s.x * scale + w / 2 - (w / 2) * scale;
+            const y2d = s.y * scale + h / 2 - (h / 2) * scale;
+
+            ctx.beginPath();
+            ctx.arc(x2d, y2d, s.r * scale, 0, 2 * Math.PI);
+            ctx.fillStyle = s.color;
+            ctx.shadowColor = "#00ffe7"; // Cyan glow
+            ctx.shadowBlur = 20 * scale; // Blur based on distance
+            ctx.fill();
+            ctx.shadowBlur = 0; // Reset shadow for next draw
+        }
+
+        // Animation loop for 3D background
+        function animateBackground() {
+            ctx.clearRect(0, 0, w, h); // Clear canvas
+            for (let s of spheres) {
+                // Update sphere positions
+                s.x += s.dx;
+                s.y += s.dy;
+                s.z += s.dz;
+
+                // Wrap spheres around the screen or reverse direction
+                if (s.x < -s.r * 2 || s.x > w + s.r * 2) s.dx *= -1;
+                if (s.y < -s.r * 2 || s.y > h + s.r * 2) s.dy *= -1;
+                if (s.z < 100 || s.z > 500) s.dz *= -1; // Keep Z within bounds
+
+                drawSphere(s);
+            }
+            requestAnimationFrame(animateBackground); // Loop animation
+        }
+        // Start the background animation when the window loads
+        window.onload = animateBackground;
+
+
+        // --- Chatbot Logic ---
+        const chatWindow = document.getElementById('chat-window');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Function to append messages to the chat window
+        function appendMessage(sender, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            msgDiv.innerHTML = `${text}`;
+            chatWindow.appendChild(msgDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to bottom
+        }
+
+        // Function to display a loading indicator
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message bot loading-message';
+            loadingDiv.innerHTML = `<span>Tayyab's AI Assistant:</span> <span class="loading-dots"><div></div><div></div><div></div></span>`;
+            chatWindow.appendChild(loadingDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            sendBtn.disabled = true; // Disable send button while loading
+            chatInput.disabled = true; // Disable input while loading
+        }
+
+        // Function to remove the loading indicator
+        function hideLoading() {
+            const loadingMessage = chatWindow.querySelector('.loading-message');
+            if (loadingMessage) {
+                loadingMessage.remove();
+            }
+            sendBtn.disabled = false; // Re-enable send button
+            chatInput.disabled = false; // Re-enable input
+            chatInput.focus(); // Focus input for next message
+        }
+
+        // Function to get response from Flask backend
+        async function getGeminiResponse(userText) {
+            showLoading(); // Show loading dots
+            try {
+                const payload = {
+                    message: userText,
+                    history: chatHistory
+                };
+
+                const response = await fetch(FLASK_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+                }
+
+                const result = await response.json();
+
+                // Check if the response structure is as expected
+                if (result.response) {
+                    const botResponseText = result.response;
+                    // Update chat history with the response from backend
+                    if (result.history) {
+                        chatHistory = result.history;
+                    }
+                    return botResponseText;
+                } else {
+                    return "Sorry, I couldn't get a valid response from the AI.";
+                }
+
+            } catch (error) {
+                console.error("Error calling Flask API:", error);
+                return `Apologies, there was an issue connecting to the AI: ${error.message}. Please try again.`;
+            } finally {
+                hideLoading(); // Hide loading dots regardless of success or failure
+            }
+        }
+
+        // Function to handle sending messages
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return; // Don't send empty messages
+
+            appendMessage('user', text); // Display user's message immediately
+            chatInput.value = ''; // Clear input field
+
+            // Get bot's reply from Gemini API
+            const botResponse = await getGeminiResponse(text);
+            appendMessage('bot', botResponse); // Display bot's response
+        }
+
+        // Event listeners for send button and Enter key
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initial welcome message from the bot
+        window.addEventListener('load', () => {
+            appendMessage('bot', "Hello! I'm Tayyab's AI Assistant. How can I help you today?");
+        });
+    </script>
+</body>
+</html>
