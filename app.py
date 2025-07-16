@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, render_template
 import google.generativeai as genai
 from flask_cors import CORS # Import CORS for cross-origin requests
 
@@ -20,7 +20,7 @@ model = genai.GenerativeModel('gemini-1.5-flash')
 
 @app.route('/')
 def index():
-    return send_file('index.html')
+    return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():

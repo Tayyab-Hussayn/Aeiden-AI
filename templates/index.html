@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A futuristic chatbot with a 3D background animation powered by Gemini AI.">
+    <meta charset="UTF-8">
+    <title>Tayyab's AI Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="chatbot-container">
+        <div class="chatbot-title">Tayyab's AI Assistant</div>
+        <div class="chat-window" id="chat-window"></div>
+        <input type="text" class="chat-input" id="chat-input" placeholder="Type your message...">
+        <button class="send-btn" id="send-btn">Send</button>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
