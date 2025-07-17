@@ -1,4 +1,4 @@
-# 🤖 Tayyab's AI Chatbot
+# 🤖 Aeiden AI
 
 A modern, interactive AI chatbot web application powered by Google's Gemini AI, featuring a stunning 3D animated background and responsive design.
 
@@ -118,7 +118,7 @@ Open your web browser and visit: [http://127.0.0.1:5000](http://127.0.0.1:5000)
 ## 📁 Project Structure
 
 ```
-tayyab-ai-chatbot/
+Aeiden AI/
 ├── app.py                 # Main Flask application
 ├── config.py              # Configuration settings
 ├── requirements.txt       # Python dependencies
@@ -176,6 +176,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 Tayyab Hussayn - [GitHub Profile](https://github.com/Tayyab-Hussayn)
+
+Tayyab Hussayn - [Linkedin Profile](https://linkedin/in/tayyabhussayn)
 
 Project Link: [https://github.com/Tayyab-Hussayn/tayyab-ai-chatbot](https://github.com/Tayyab-Hussayn/tayyab-ai-chatbot)
 
